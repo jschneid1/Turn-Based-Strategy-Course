@@ -18,7 +18,7 @@ public class LevelGrid : MonoBehaviour
         Instance = this;
 
         _gridSystem = new GridSystem<GridObject>(10, 10, 2.0f, (GridSystem<GridObject> g, GridPosition gridPosition) => new GridObject(g, gridPosition));
-        _gridSystem.CreateDebugObjects(_gridDebugObjectPrefab);
+        //_gridSystem.CreateDebugObjects(_gridDebugObjectPrefab);
     }
     // Start is called before the first frame update
     void Start()

@@ -20,10 +20,18 @@ public class Testing : MonoBehaviour
     void Update()
     {
         //Debug.Log(_gridSystem.GetGridPosition(MousePosWorld.GetPosition()));
-        /*if(Input.GetKeyDown(KeyCode.T)) 
+        if(Input.GetKeyDown(KeyCode.T)) 
         {
-            GridSystemVisual.Instance.HideAllGridPositions();
-            GridSystemVisual.Instance.ShowGridPositionList(_unit.GetMoveAction().GetValidGridPositionList(), gridVisualType);
-        }  */      
+            GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MousePosWorld.GetPosition());
+            GridPosition startGridPosition = new GridPosition(0, 0);
+
+            List<GridPosition> gridPositionList = PathFinding.Instance.FindPath(startGridPosition, mouseGridPosition);
+
+            for (int i = 0; i < gridPositionList.Count - 1; i++)
+            {
+                Debug.DrawLine(LevelGrid.Instance.GetWorldPosition(gridPositionList[i]), LevelGrid.Instance.GetWorldPosition(gridPositionList[i + 1]),
+                    Color.white, 10f);
+            }
+        }     
     }
 }
