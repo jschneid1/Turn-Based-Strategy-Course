@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PathNode
 {
@@ -9,6 +10,8 @@ public class PathNode
     private int _gCost, _hCost, _fCost;
 
     private PathNode _cameFromPathNode;
+
+    private bool _isWalkable = true;
 
     // Start is called before the first frame update
     void Start()
@@ -80,5 +83,15 @@ public class PathNode
     public GridPosition GetGridPosition()
     { 
         return _gridPosition;
+    }
+
+    public bool IsWalkable()
+        { 
+            return _isWalkable; 
+    }
+
+    public void SetIsWalkable(bool isWalkable)
+    { 
+        this._isWalkable = isWalkable;
     }
 }

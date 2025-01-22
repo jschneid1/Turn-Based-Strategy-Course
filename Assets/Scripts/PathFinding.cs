@@ -7,7 +7,8 @@ public class PathFinding : MonoBehaviour
     public static PathFinding Instance { get; private set; }
 
     private const int MOVE_STRAIGHT_COST = 10, MOVE_DIAGONAL_COST = 14;
-    [SerializeField] Transform _gridDebugObjectPrefab;
+    [SerializeField] private Transform _gridDebugObjectPrefab;
+    [SerializeField] private LayerMask _obstaclesLayerMask;
 
     private int _width, _height;
     private float _cellSize;
@@ -24,8 +25,7 @@ public class PathFinding : MonoBehaviour
         }
         Instance = this;
 
-        _gridSystem = new GridSystem<PathNode>(10, 10, 2.0f, (GridSystem<PathNode> g, GridPosition gridPosition) => new PathNode(gridPosition));
-        _gridSystem.CreateDebugObjects(_gridDebugObjectPrefab);
+        
     }
     void Start()
     {
@@ -36,6 +36,30 @@ public class PathFinding : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void SetUp(int width, int height, float cellsize)
+    {
+        this._width = width;
+        this._height = height;
+        this._cellSize = cellsize;
+
+        _gridSystem = new GridSystem<PathNode>(_width, _height, _cellSize, (GridSystem<PathNode> g, GridPosition gridPosition) => new PathNode(gridPosition));
+        _gridSystem.CreateDebugObjects(_gridDebugObjectPrefab);
+
+        for (int x = 0; x < _width; x++)
+        {
+            for (int z = 0; z < _height; z++)
+            { 
+                GridPosition gridPosition = new GridPosition(x, z);
+                Vector3 worldPosition = LevelGrid.Instance. GetWorldPosition(gridPosition);
+                float raycastOffsetDistance = 5f;
+                if(Physics.Raycast(worldPosition + Vector3.down * raycastOffsetDistance, Vector3.up, raycastOffsetDistance * 2, _obstaclesLayerMask))
+                {
+                    GetNode(x, z).SetIsWalkable(false);
+                }
+            }
+        }
     }
 
     public List<GridPosition> FindPath(GridPosition startGridPosition, GridPosition endGridPosition)
@@ -83,6 +107,12 @@ public class PathFinding : MonoBehaviour
             { 
                 if(closedList.Contains(neighbourNode))
                 {
+                    continue;
+                }
+
+                if(!neighbourNode.IsWalkable())
+                {
+                    closedList.Add(neighbourNode);
                     continue;
                 }
 
