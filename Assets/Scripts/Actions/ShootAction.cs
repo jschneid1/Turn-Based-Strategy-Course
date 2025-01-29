@@ -18,6 +18,7 @@ public class ShootAction : BaseAction
     private Unit _targetUnit;
     private bool _canShootBullet;
     [SerializeField] private GameObject _actionVirtualCamera;
+    [SerializeField] private LayerMask obstaclesLayerMask;
     // Start is called before the first frame update
     void Start()
     {
@@ -105,13 +106,13 @@ public class ShootAction : BaseAction
         return "Shoot";
     }
 
-    public override List<GridPosition> GetValidGridPositionList()
+    /*public override List<GridPosition> GetValidGridPositionList()
     {
         GridPosition unitGridPosition = _unit.GetGridPosition();
         return GetValidGridPositionList(unitGridPosition);
-    }
+    }*/
 
-    public List<GridPosition> GetValidGridPositionList(GridPosition unitGridPosition)
+    /*public override List<GridPosition> GetValidGridPositionList()
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
@@ -141,10 +142,73 @@ public class ShootAction : BaseAction
                     continue;
                 }
 
+                Vector3 unitWorldPosition = LevelGrid.Instance.GetWorldPosition(unitGridPosition);
+                Vector3 shootDirection = (targetUnit.GetWorldPosition() - unitWorldPosition).normalized;
+                float unitShoulderHeight = 1.7f;
+
+                if(Physics.Raycast(unitWorldPosition + Vector3.up * unitShoulderHeight, shootDirection, Vector3.Distance(unitWorldPosition, targetUnit.GetWorldPosition()), obstaclesLayerMask))
+                {
+                    //Blocked by an obstacle
+                    continue;  
+                }
+
                 validGridPositionList.Add(testGridPosition);
             }
         }
 
+        return validGridPositionList;
+    }*/
+
+    public override List<GridPosition> GetValidGridPositionList()
+    {
+        List<GridPosition> validGridPositionList = new List<GridPosition>();
+
+        GridPosition unitGridPosition = _unit.GetGridPosition();
+
+        for (int x = -_maxShootDistance; x <= _maxShootDistance; x++)
+        {
+            for (int z = -_maxShootDistance; z <= _maxShootDistance; z++)
+            {
+                GridPosition offsetGridPosition = new GridPosition(x, z);
+                GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
+
+                if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
+                {
+                    continue;
+                }
+
+                if (unitGridPosition == testGridPosition)
+                {
+                    //Unit already occupies this position
+                    continue;
+                }
+
+                if (LevelGrid.Instance.HasAnyUnitOnGridPosition(testGridPosition))
+                {
+                    //Grid position occupied by another unit
+                    continue;
+                }
+
+                /*if (!PathFinding.Instance.IsWalkableGridPosition(testGridPosition))
+                {
+                    continue;
+                }
+
+                if (!PathFinding.Instance.IsEndPositionReachable(unitGridPosition, testGridPosition))
+                {
+                    continue;
+                }
+
+                int pathFindingDistanceMultiplier = 10;
+                if (PathFinding.Instance.GetPathLength(unitGridPosition, testGridPosition) > _maxShootDistance * pathFindingDistanceMultiplier)
+                {
+                    //Path length is too long.
+                    continue;
+                }*/
+
+                validGridPositionList.Add(testGridPosition);
+            }
+        }
         return validGridPositionList;
     }
 
@@ -180,6 +244,6 @@ public class ShootAction : BaseAction
 
     public int GetTargetCountAtPosition(GridPosition gridPosition)
     { 
-        return GetValidGridPositionList(gridPosition).Count;
+        return GetValidGridPositionList().Count;
     }
 }

@@ -58,7 +58,9 @@ MonoBehaviour:
   _ragDollPrefab: {fileID: 3925295773092408102, guid: 41fbde33e60c1ae4980a7a984b4f0ca5,
     type: 3}
   _unitWorldUI: {fileID: 7931913002202931191}
+  _unitManager: {fileID: 0}
   _isEnemy: 0
+  _enemyMoved: 0
 --- !u!65 &2698006219597151327
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -93,6 +95,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxMoveDistance: 4
+  _currentPositionIndex: 0
 --- !u!114 &708045884099915584
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,6 +121,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _actionVirtualCamera: {fileID: 7557617238774821735}
+  obstaclesLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!114 &418979646586514698
 MonoBehaviour:
   m_ObjectHideFlags: 0

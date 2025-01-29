@@ -18,9 +18,6 @@ public class Unit : MonoBehaviour
 
     private void Awake()
     {
-        /*_moveAction = GetComponent<MoveAction>();
-        _spinAction = GetComponent<SpinAction>();
-        _shootAction = GetComponent<ShootAction>();*/
         _baseActionArray = GetComponents<BaseAction>();
         _healthSystem = GetComponent<HealthSystem>();
         _unitManager = GameObject.Find("UnitManager").transform;
@@ -54,20 +51,6 @@ public class Unit : MonoBehaviour
         }
         return null;
     }
-    /*public MoveAction GetMoveAction()
-    { 
-        return _moveAction; 
-    }
-
-    public SpinAction GetSpinAction() 
-    {
-        return _spinAction;
-    }
-
-    public ShootAction GetShootAction()
-    {
-        return _shootAction;
-    }*/
 
     public GridPosition GetGridPosition() 
     {

@@ -9,14 +9,10 @@ public class MoveAction : BaseAction
     //public Event OnStartMoving;
     //public Event OnStopMoving;
     //[SerializeField] private GameObject _gridSystemVisual;
-    private Vector3 _targetPosition;
-    [SerializeField] private int _maxMoveDistance = 4;
+    private List<Vector3> _positionList;
+    [SerializeField] private int _maxMoveDistance = 4, _currentPositionIndex;
     
 
-    /*protected override void Awake()
-    {
-       
-    }*/
     // Start is called before the first frame update
     void Start()
     {
@@ -30,11 +26,14 @@ public class MoveAction : BaseAction
         {
             return;
         }
+        Vector3 targetPosition = _positionList[_currentPositionIndex];
+        Vector3 moveDirection = (targetPosition - transform.position).normalized;
 
-        Vector3 moveDirection = (_targetPosition - transform.position).normalized;
+        float rotateSpeed = 10.0f;
+        transform.forward = Vector3.Lerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
 
         float stoppingDistance = 0.1f;
-        if (Vector3.Distance(transform.position, _targetPosition) > stoppingDistance)
+        if (Vector3.Distance(transform.position, targetPosition) > stoppingDistance)
         {
             
 
@@ -47,19 +46,29 @@ public class MoveAction : BaseAction
         else
         {
             //_unitAnimator.SetBool("IsWalking", false);
-            GetComponentInParent<UnitAnimator>().MoveAction_OnStopMoving();
-            _isActive = false;
-            _onActionComplete();
+            _currentPositionIndex++;
+            if (_currentPositionIndex >= _positionList.Count) 
+            {
+                GetComponentInParent<UnitAnimator>().MoveAction_OnStopMoving();
+                _isActive = false;
+                _onActionComplete();
+            }
+            
         }
 
-        float rotateSpeed = 10.0f;
-        transform.forward = Vector3.Lerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
     }
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
+        List<GridPosition> pathGridPositionList = PathFinding.Instance.FindPath(_unit.GetGridPosition(), gridPosition, out int pathLength);
         this._onActionComplete = onActionComplete;
-        this._targetPosition = LevelGrid.Instance.GetWorldPosition(gridPosition);
+        _currentPositionIndex = 0;
+        _positionList = new List<Vector3>();
+        
+        foreach(GridPosition pathGridPosition in pathGridPositionList)
+        {
+            _positionList.Add(LevelGrid.Instance.GetWorldPosition(pathGridPosition));
+        }
         _isActive = true;
         
         //OnStartMoving?.Invoke(this, EventArgs.Empty);
@@ -92,6 +101,23 @@ public class MoveAction : BaseAction
                 if(LevelGrid.Instance.HasAnyUnitOnGridPosition(testGridPosition))
                 {
                     //Grid position occupied by another unit
+                    continue;
+                }
+
+                if(!PathFinding.Instance.IsWalkableGridPosition(testGridPosition))
+                {
+                    continue; 
+                }
+
+                if (!PathFinding.Instance.IsEndPositionReachable(unitGridPosition, testGridPosition))
+                {
+                    continue;
+                }
+
+                int pathFindingDistanceMultiplier = 10;
+                if(PathFinding.Instance.GetPathLength(unitGridPosition, testGridPosition) > _maxMoveDistance * pathFindingDistanceMultiplier)
+                {
+                    //Path length is too long.
                     continue;
                 }
 
